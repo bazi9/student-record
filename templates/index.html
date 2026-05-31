@@ -353,9 +353,13 @@
         }
 
         async function loadStudents() {
-            const response = await fetch('/get_students');
-            globalStudents = await response.json();
-            renderTable(globalStudents);
+            try {
+                const response = await fetch('/get_students');
+                globalStudents = await response.json();
+                renderTable(globalStudents);
+            } catch (error) {
+                console.error("Error loading students:", error);
+            }
         }
 
         function renderTable(data) {
@@ -390,14 +394,12 @@
             const student = globalStudents.find(s => s.sys_id === currentRightClickId);
             
             if (student) {
-                // Populate card fields
                 document.getElementById('cardId').innerText = student.id;
                 document.getElementById('cardName').innerText = student.name;
                 document.getElementById('cardAge').innerText = student.age + " years old";
                 document.getElementById('cardEmail').innerText = student.email;
                 document.getElementById('cardAddress').innerText = student.address;
                 
-                // Grab the first letter of the name for the Avatar
                 const firstLetter = student.name ? student.name.charAt(0).toUpperCase() : '?';
                 document.getElementById('profileAvatar').innerText = firstLetter;
                 
