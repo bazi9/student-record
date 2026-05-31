@@ -259,6 +259,7 @@
         </ul>
     </div>
 
+    <!-- Modals (Add, Edit, Profile) -->
     <div id="addModalOverlay" class="modal-overlay" onclick="closeAddForm()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="close-btn" onclick="closeAddForm()">✖</button>
@@ -315,8 +316,20 @@
     </div>
 
     <script>
-        // Use LocalStorage instead of backend fetches
-        let globalStudents = JSON.parse(localStorage.getItem('studentRecords')) || []; 
+        // Setup initial default users if none exist in LocalStorage
+        const defaultUsers = [
+            { sys_id: "ae1b4bc6", id: "1", name: "Ionut Alexandru Bazarca", age: "35", email: "ionutb@gmail.com", address: "street" },
+            { sys_id: "6f2021c4", id: "2", name: "Ionut Bazarca", age: "21", email: "ionut@gmail.com", address: "street" },
+            { sys_id: "a1d6e1ee", id: "3", name: "ionut", age: "54", email: "ionut@gmail.com", address: "street" },
+            { sys_id: "7749afff", id: "4", name: "test", age: "45", email: "test@gmail.com", address: "street" }
+        ];
+
+        // Initialize from LocalStorage or inject defaults
+        if (!localStorage.getItem('studentRecords')) {
+            localStorage.setItem('studentRecords', JSON.stringify(defaultUsers));
+        }
+
+        let globalStudents = JSON.parse(localStorage.getItem('studentRecords')); 
         let sortDirections = { 1: true, 2: true, 3: true, 4: true, 5: true }; 
         let currentRightClickId = null; 
         let currentEditId = null; 
