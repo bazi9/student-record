@@ -85,10 +85,7 @@
 
         .student-name-cell { cursor: context-menu; }
 
-        /* =========================================
-           Forms & Profiles
-           ========================================= */
-
+        /* Forms & Profiles */
         .modal-overlay {
             display: none; 
             position: fixed; 
@@ -117,7 +114,6 @@
             margin-bottom: 20px;
         }
 
-        /* Styles for the Add/Edit Forms */
         .form-group { margin-bottom: 15px; }
         .form-group input { 
             width: 100%; 
@@ -145,10 +141,7 @@
         }
         .close-btn:hover { color: #2d3748; }
 
-        /* =========================================
-           Profile Card Styling
-           ========================================= */
-
+        /* Profile Card Styling */
         .profile-header {
             text-align: center;
             margin-bottom: 25px;
@@ -256,7 +249,7 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            </tbody>
+        </tbody>
     </table>
 
     <div id="customContextMenu">
@@ -318,12 +311,12 @@
                     <span class="profile-value" id="cardAddress">-</span>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-        let globalStudents = []; 
+        // Use LocalStorage instead of backend fetches
+        let globalStudents = JSON.parse(localStorage.getItem('studentRecords')) || []; 
         let sortDirections = { 1: true, 2: true, 3: true, 4: true, 5: true }; 
         let currentRightClickId = null; 
         let currentEditId = null; 
@@ -334,32 +327,14 @@
             document.getElementById('customContextMenu').style.display = 'none';
         }
 
-        function openAddForm() {
-            document.getElementById('addModalOverlay').style.display = 'flex';
-        }
-        function closeAddForm() {
-            document.getElementById('addModalOverlay').style.display = 'none';
-        }
+        function openAddForm() { document.getElementById('addModalOverlay').style.display = 'flex'; }
+        function closeAddForm() { document.getElementById('addModalOverlay').style.display = 'none'; }
+        function openEditForm() { document.getElementById('editModalOverlay').style.display = 'flex'; }
+        function closeEditForm() { document.getElementById('editModalOverlay').style.display = 'none'; }
+        function closeProfile() { document.getElementById('studentModalOverlay').style.display = 'none'; }
 
-        function openEditForm() {
-            document.getElementById('editModalOverlay').style.display = 'flex';
-        }
-        function closeEditForm() {
-            document.getElementById('editModalOverlay').style.display = 'none';
-        }
-
-        function closeProfile() {
-            document.getElementById('studentModalOverlay').style.display = 'none';
-        }
-
-        async function loadStudents() {
-            try {
-                const response = await fetch('/get_students');
-                globalStudents = await response.json();
-                renderTable(globalStudents);
-            } catch (error) {
-                console.error("Error loading students:", error);
-            }
+        function loadStudents() {
+            renderTable(globalStudents);
         }
 
         function renderTable(data) {
@@ -383,7 +358,6 @@
         function handleRightClick(event, sysId) {
             event.preventDefault(); 
             currentRightClickId = sysId; 
-
             const menu = document.getElementById('customContextMenu');
             menu.style.display = 'block';
             menu.style.left = event.pageX + 'px'; 
@@ -392,57 +366,46 @@
 
         function viewProfile() {
             const student = globalStudents.find(s => s.sys_id === currentRightClickId);
-            
             if (student) {
                 document.getElementById('cardId').innerText = student.id;
                 document.getElementById('cardName').innerText = student.name;
                 document.getElementById('cardAge').innerText = student.age + " years old";
                 document.getElementById('cardEmail').innerText = student.email;
                 document.getElementById('cardAddress').innerText = student.address;
-                
                 const firstLetter = student.name ? student.name.charAt(0).toUpperCase() : '?';
                 document.getElementById('profileAvatar').innerText = firstLetter;
-                
                 document.getElementById('studentModalOverlay').style.display = 'flex';
             }
         }
 
-        async function removeSingleStudent() {
+        function removeSingleStudent() {
             if(confirm("Are you sure you want to remove this specific student?")) {
-                await fetch('/delete_students', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids: [currentRightClickId] })
-                });
+                globalStudents = globalStudents.filter(s => s.sys_id !== currentRightClickId);
+                localStorage.setItem('studentRecords', JSON.stringify(globalStudents));
                 loadStudents();
             }
         }
 
         function sortTable(columnKey, colIndex, isNumber = false) {
             let isAsc = sortDirections[colIndex];
-
             globalStudents.sort((a, b) => {
                 let valA = a[columnKey];
                 let valB = b[columnKey];
-
                 if (isNumber) {
-                    valA = parseFloat(valA) || 0;
-                    valB = parseFloat(valB) || 0;
+                    valA = parseFloat(valA) || 0; valB = parseFloat(valB) || 0;
                     return isAsc ? valA - valB : valB - valA;
                 } else {
-                    valA = valA.toLowerCase();
-                    valB = valB.toLowerCase();
+                    valA = valA.toLowerCase(); valB = valB.toLowerCase();
                     if (valA < valB) return isAsc ? -1 : 1;
                     if (valA > valB) return isAsc ? 1 : -1;
                     return 0;
                 }
             });
-
             sortDirections[colIndex] = !isAsc;
             renderTable(globalStudents);
         }
 
-        async function submitStudent() {
+        function submitStudent() {
             const idVal = document.getElementById('idNum').value;
             const nameVal = document.getElementById('name').value;
             const ageVal = document.getElementById('age').value;
@@ -455,19 +418,11 @@
             if (!emailVal.includes("@")) { alert("Error: Email must contain an '@' symbol."); return; }
             if (addressVal.trim() === "") { alert("Error: Address cannot be blank."); return; }
 
-            const data = {
-                id: idVal,
-                name: nameVal,
-                age: ageVal,
-                email: emailVal,
-                address: addressVal
-            };
+            const newSysId = 'sys_' + Date.now();
+            const data = { sys_id: newSysId, id: idVal, name: nameVal, age: ageVal, email: emailVal, address: addressVal };
 
-            await fetch('/add_student', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            globalStudents.push(data);
+            localStorage.setItem('studentRecords', JSON.stringify(globalStudents));
 
             document.getElementById('idNum').value = '';
             document.getElementById('name').value = '';
@@ -483,21 +438,17 @@
             const checkboxes = document.querySelectorAll('.student-checkbox');
             const actionBar = document.getElementById('topActionBar'); 
             let isChecked = false;
-
             checkboxes.forEach(box => { if (box.checked) isChecked = true; });
             actionBar.style.display = isChecked ? 'flex' : 'none';
         }
 
-        async function removeSelected() {
+        function removeSelected() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
             const idsToRemove = Array.from(checkboxes).map(box => box.value);
 
             if(confirm("Are you sure you want to remove selected students?")) {
-                await fetch('/delete_students', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids: idsToRemove })
-                });
+                globalStudents = globalStudents.filter(s => !idsToRemove.includes(s.sys_id));
+                localStorage.setItem('studentRecords', JSON.stringify(globalStudents));
                 loadStudents();
                 closeEditForm();
             }
@@ -505,29 +456,23 @@
 
         function editSelected() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
-            
-            if (checkboxes.length !== 1) {
-                alert("Please select exactly one student to edit.");
-                return;
-            }
+            if (checkboxes.length !== 1) { alert("Please select exactly one student to edit."); return; }
             
             const sysId = checkboxes[0].value;
             const student = globalStudents.find(s => s.sys_id === sysId);
             
             if (student) {
                 currentEditId = sysId; 
-                
                 document.getElementById('editIdNum').value = student.id;
                 document.getElementById('editName').value = student.name;
                 document.getElementById('editAge').value = student.age;
                 document.getElementById('editEmail').value = student.email;
                 document.getElementById('editAddress').value = student.address;
-                
                 openEditForm();
             }
         }
 
-        async function submitEdit() {
+        function submitEdit() {
             const idVal = document.getElementById('editIdNum').value;
             const nameVal = document.getElementById('editName').value;
             const ageVal = document.getElementById('editAge').value;
@@ -540,24 +485,21 @@
             if (!emailVal.includes("@")) { alert("Error: Email must contain an '@' symbol."); return; }
             if (addressVal.trim() === "") { alert("Error: Address cannot be blank."); return; }
 
-            const data = {
-                sys_id: currentEditId, 
-                id: idVal,
-                name: nameVal,
-                age: ageVal,
-                email: emailVal,
-                address: addressVal
-            };
-
-            await fetch('/edit_student', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            const index = globalStudents.findIndex(s => s.sys_id === currentEditId);
+            if (index !== -1) {
+                globalStudents[index] = {
+                    sys_id: currentEditId,
+                    id: idVal,
+                    name: nameVal,
+                    age: ageVal,
+                    email: emailVal,
+                    address: addressVal
+                };
+                localStorage.setItem('studentRecords', JSON.stringify(globalStudents));
+            }
 
             closeEditForm();
             loadStudents(); 
-            
             document.querySelectorAll('.student-checkbox').forEach(box => box.checked = false);
             checkSelection(); 
         }
