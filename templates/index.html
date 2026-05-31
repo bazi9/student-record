@@ -259,7 +259,6 @@
         </ul>
     </div>
 
-    <!-- Modals (Add, Edit, Profile) -->
     <div id="addModalOverlay" class="modal-overlay" onclick="closeAddForm()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="close-btn" onclick="closeAddForm()">✖</button>
@@ -329,6 +328,7 @@
             localStorage.setItem('studentRecords', JSON.stringify(defaultUsers));
         }
 
+        // Declare the variables ONCE
         let globalStudents = JSON.parse(localStorage.getItem('studentRecords')); 
         let sortDirections = { 1: true, 2: true, 3: true, 4: true, 5: true }; 
         let currentRightClickId = null; 
