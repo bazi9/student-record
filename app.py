@@ -220,7 +220,6 @@ def add_student():
         age=_to_int(request.form.get("age")),
         email=request.form.get("email", "").strip(),
         address=request.form.get("address", "").strip(),
-        score=_to_float(request.form.get("score")),
         owner_id=user.id,
     )
     db.session.add(student)
@@ -241,7 +240,6 @@ def edit_student(student_pk):
     student.age = _to_int(request.form.get("age"))
     student.email = request.form.get("email", "").strip()
     student.address = request.form.get("address", "").strip()
-    student.score = _to_float(request.form.get("score"))
     db.session.commit()
     flash("Student updated.", "success")
     return redirect(url_for("dashboard"))

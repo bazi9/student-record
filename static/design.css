@@ -139,6 +139,44 @@ td.actions form { margin-left: 4px; }
 /* Empty state */
 .empty { color: #718096; background: #fff; padding: 30px; border-radius: 8px; text-align: center; }
 
+/* Right-clickable name cell */
+.student-name-cell { cursor: context-menu; font-weight: 600; color: #2c3e50; }
+.student-name-cell:hover { text-decoration: underline; }
+
+/* Profile card */
+.profile-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 12px 34px rgba(0,0,0,0.22);
+}
+.profile-avatar {
+    width: 72px; height: 72px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: #4CAF50;
+    color: #fff;
+    font-size: 32px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.profile-card h3 { margin: 0 0 18px; }
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 4px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 14px;
+    text-align: left;
+}
+.profile-label { color: #718096; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+.profile-card .btn-block { margin-top: 18px; }
+
 /* Role badges */
 .role-badge {
     display: inline-block;
