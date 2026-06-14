@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Rankings - Student Records{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h2>Rankings</h2>
+    <span class="subtitle">Students ranked by score (highest first)</span>
+</div>
+
+{% if students %}
+<table>
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>ID</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td class="rank-cell">
+                {% if loop.index == 1 %}<span class="medal gold">1</span>
+                {% elif loop.index == 2 %}<span class="medal silver">2</span>
+                {% elif loop.index == 3 %}<span class="medal bronze">3</span>
+                {% else %}{{ loop.index }}{% endif %}
+            </td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.student_id }}</td>
+            <td><strong>{{ s.score }}</strong></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty">No students to rank yet. Add students with scores on the Records page.</p>
+{% endif %}
+{% endblock %}

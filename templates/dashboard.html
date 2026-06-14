@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Records - Student Records{% endblock %}
+{% block content %}
+<div class="page-head">
+    <h2>Student Records</h2>
+    <button class="btn-primary" onclick="openAddForm()">+ Add Student</button>
+</div>
+
+{% if students %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Score</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.student_id }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.age if s.age is not none else '-' }}</td>
+            <td>{{ s.email }}</td>
+            <td>{{ s.address }}</td>
+            <td>{{ s.score }}</td>
+            <td class="actions">
+                <button class="btn-warning btn-sm"
+                    onclick="openEditForm('{{ s.id }}', '{{ s.student_id }}', '{{ s.name|e }}', '{{ s.age if s.age is not none else '' }}', '{{ s.email|e }}', '{{ s.address|e }}', '{{ s.score }}')">Edit</button>
+                <form method="POST" action="{{ url_for('delete_student', student_pk=s.id) }}" style="display:inline"
+                      onsubmit="return confirm('Delete this student?');">
+                    <button type="submit" class="btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty">No students yet. Click "Add Student" to create your first record.</p>
+{% endif %}
+
+<!-- Add modal -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-card">
+        <h3>Add Student</h3>
+        <form method="POST" action="{{ url_for('add_student') }}">
+            <div class="form-group"><input type="text" name="student_id" placeholder="ID Number"></div>
+            <div class="form-group"><input type="text" name="name" placeholder="Full Name" required></div>
+            <div class="form-group"><input type="number" name="age" placeholder="Age"></div>
+            <div class="form-group"><input type="email" name="email" placeholder="Email Address"></div>
+            <div class="form-group"><input type="text" name="address" placeholder="Home Address"></div>
+            <div class="form-group"><input type="number" step="any" name="score" placeholder="Score (for rankings)"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeAddForm()">Cancel</button>
+                <button type="submit" class="btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-card">
+        <h3>Edit Student</h3>
+        <form method="POST" id="editForm">
+            <div class="form-group"><input type="text" name="student_id" id="editStudentId" placeholder="ID Number"></div>
+            <div class="form-group"><input type="text" name="name" id="editName" placeholder="Full Name" required></div>
+            <div class="form-group"><input type="number" name="age" id="editAge" placeholder="Age"></div>
+            <div class="form-group"><input type="email" name="email" id="editEmail" placeholder="Email Address"></div>
+            <div class="form-group"><input type="text" name="address" id="editAddress" placeholder="Home Address"></div>
+            <div class="form-group"><input type="number" step="any" name="score" id="editScore" placeholder="Score (for rankings)"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeEditForm()">Cancel</button>
+                <button type="submit" class="btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddForm() { document.getElementById('addModal').style.display = 'flex'; }
+    function closeAddForm() { document.getElementById('addModal').style.display = 'none'; }
+    function closeEditForm() { document.getElementById('editModal').style.display = 'none'; }
+
+    function openEditForm(id, studentId, name, age, email, address, score) {
+        document.getElementById('editForm').action = '/students/' + id + '/edit';
+        document.getElementById('editStudentId').value = studentId;
+        document.getElementById('editName').value = name;
+        document.getElementById('editAge').value = age;
+        document.getElementById('editEmail').value = email;
+        document.getElementById('editAddress').value = address;
+        document.getElementById('editScore').value = score;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+</script>
+{% endblock %}

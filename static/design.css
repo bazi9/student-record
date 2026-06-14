@@ -1,225 +1,155 @@
-body { 
-    font-family: 'Segoe UI', system-ui, sans-serif; 
-    background-color: #f4f7f6; 
-    color: #333; 
-    margin: 40px; 
+/* Student Records - styles (extends the original GitHub Pages theme) */
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    margin: 0;
 }
 
-h2 { color: #2c3e50; }
+h2 { color: #2c3e50; margin: 0; }
+h3 { color: #2c3e50; }
 
-/* Top Buttons */
-.header-actions {
+/* Navbar */
+.navbar {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: center;
+    background: #2c3e50;
+    color: #fff;
+    padding: 14px 30px;
+}
+.navbar .brand { font-weight: 700; font-size: 18px; }
+.nav-links { display: flex; align-items: center; gap: 18px; }
+.nav-links a { color: #dfe4ea; text-decoration: none; font-weight: 600; }
+.nav-links a:hover { color: #fff; }
+.nav-user { color: #9fd3a0; font-weight: 600; }
+.nav-logout { color: #ff8b94 !important; }
+
+/* Layout */
+.container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+.page-head {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    height: 45px; 
 }
+.subtitle { color: #718096; font-size: 14px; }
 
-/* Rounded buttons */
-button { 
-    padding: 10px 15px; 
-    border: none; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-weight: 600; 
+/* Buttons */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
     transition: all 0.2s ease;
-    margin-right: 8px;
 }
 .btn-primary { background-color: #4CAF50; color: white; }
 .btn-primary:hover { background-color: #45a049; }
-
 .btn-danger { background-color: #ff4757; color: white; }
 .btn-danger:hover { background-color: #ff6b81; }
-
 .btn-secondary { background-color: #dfe4ea; color: #2f3542; }
 .btn-secondary:hover { background-color: #ced6e0; }
-
 .btn-warning { background-color: #f39c12; color: white; }
 .btn-warning:hover { background-color: #d68910; }
+.btn-sm { padding: 6px 10px; font-size: 13px; }
+.btn-block { width: 100%; margin-top: 8px; }
 
-/* The action menu */
-#topActionBar {
-    display: none; 
-    align-items: center;
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
-
-/* Table Design */
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    table-layout: fixed; 
-    background: white; 
-    border-radius: 8px; 
-    overflow: hidden; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+th, td {
+    border-bottom: 1px solid #edf2f7;
+    padding: 14px;
+    text-align: left;
+    word-wrap: break-word;
 }
-
-th, td { 
-    border-bottom: 1px solid #edf2f7; 
-    padding: 15px; 
-    text-align: left; 
-    word-wrap: break-word; 
-}
-
-th { 
-    background-color: #f8f9fa; 
+th {
+    background-color: #f8f9fa;
     color: #718096;
     text-transform: uppercase;
     font-size: 13px;
     letter-spacing: 0.5px;
 }
-
-th.sortable { cursor: pointer; user-select: none; }
-th.sortable:hover { background-color: #e2e8f0; color: #2d3748;}
-
 tbody tr:nth-child(even) { background-color: #f0f4f8; }
-tbody tr:hover { background-color: #e2e8f0; } 
+tbody tr:hover { background-color: #e2e8f0; }
+td.actions { white-space: nowrap; }
+td.actions form { margin-left: 4px; }
 
-.student-name-cell { cursor: context-menu; }
+/* Auth cards */
+.auth-card {
+    max-width: 380px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+.auth-card h2 { margin-bottom: 20px; text-align: center; }
+.auth-switch { text-align: center; margin-top: 16px; font-size: 14px; color: #718096; }
+.auth-switch a { color: #4CAF50; font-weight: 600; text-decoration: none; }
 
-/* =========================================
-   Forms & Profiles
-   ========================================= */
+/* Forms */
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; color: #4a5568; margin-bottom: 5px; font-weight: 600; }
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dfe4ea;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.form-group input:focus { outline: none; border-color: #4CAF50; }
 
+/* Modals */
 .modal-overlay {
-    display: none; 
-    position: fixed; 
-    top: 0; left: 0; 
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4); 
-    z-index: 1001; 
-    align-items: center; 
-    justify-content: center;
-}
-
-.modal-card {
-    background: white; 
-    padding: 30px; 
-    border-radius: 16px; /* Slightly rounder for a modern feel */
-    width: 350px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-    position: relative;
-}
-
-.modal-card h3 { 
-    margin-top: 0; 
-    color: #2c3e50; 
-    border-bottom: 2px solid #edf2f7; 
-    padding-bottom: 12px; 
-    margin-bottom: 20px;
-}
-
-/* Styles for the Add/Edit Forms */
-.form-group { margin-bottom: 15px; }
-.form-group input { 
-    width: 100%; 
-    padding: 10px; 
-    border: 1px solid #cbd5e0; 
-    border-radius: 6px; 
-    box-sizing: border-box; 
-    font-family: inherit;
-}
-.form-group input:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-
-.close-btn { 
-    position: absolute; 
-    top: 20px; right: 20px; 
-    cursor: pointer; 
-    font-size: 20px; 
-    color: #a0aec0; 
-    background: none;
-    border: none;
-    padding: 0;
-}
-.close-btn:hover { color: #2d3748; }
-
-/* =========================================
-   Profile Card Styling
-   ========================================= */
-
-.profile-header {
-    text-align: center;
-    margin-bottom: 25px;
-    margin-top: 10px;
-}
-
-.profile-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    /* A friendly, soft colorful gradient */
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    display: flex;
+    background: rgba(0,0,0,0.4);
+    z-index: 1001;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 15px auto;
-    box-shadow: 0 4px 10px rgba(79, 172, 254, 0.3);
 }
-
-.profile-name {
-    font-size: 22px;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 4px;
-}
-
-.profile-subtitle {
-    font-size: 14px;
-    color: #718096;
-    font-weight: 500;
-}
-
-.profile-details-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.profile-item {
-    background-color: #f8fafc; /* Very light, soft gray */
-    padding: 12px 16px;
+.modal-card {
+    background: #fff;
+    padding: 28px;
     border-radius: 10px;
-    border: 1px solid #f1f5f9;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 
-.profile-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #94a3b8;
+/* Flash messages */
+.flash { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+.flash-success { background: #e8f7ec; color: #2e7d32; border: 1px solid #b6e3c0; }
+.flash-error { background: #fdecea; color: #c0392b; border: 1px solid #f5b7b1; }
+
+/* Empty state */
+.empty { color: #718096; background: #fff; padding: 30px; border-radius: 8px; text-align: center; }
+
+/* Rankings medals */
+.rank-cell { font-weight: 700; }
+.medal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    color: #fff;
     font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-    display: block;
 }
-
-.profile-value {
-    font-size: 15px;
-    color: #334155;
-    font-weight: 500;
-    word-wrap: break-word;
-}
-
-/* Custom Right-Click Menu */
-#customContextMenu {
-    display: none;
-    position: absolute;
-    background: white;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border-radius: 6px;
-    z-index: 1000;
-    min-width: 160px;
-    overflow: hidden;
-}
-#customContextMenu ul { list-style: none; margin: 0; padding: 5px 0; }
-#customContextMenu li { padding: 10px 15px; cursor: pointer; font-size: 14px; color: #2d3748; }
-#customContextMenu li:hover { background-color: #f1f5f9; }
-.menu-danger { color: #e53e3e !important; }
+.medal.gold { background: #f1c40f; }
+.medal.silver { background: #95a5a6; }
+.medal.bronze { background: #cd7f32; }
