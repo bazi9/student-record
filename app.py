@@ -192,30 +192,58 @@ def home():
     return redirect(url_for("login"))
 
 
+def next_student_id():
+    """Next sequential ID = (highest existing numeric student_id) + 1.
+    Falls back to (record count + 1) if existing IDs aren't numeric."""
+    highest = 0
+    for s in Student.query.all():
+        try:
+            n = int(str(s.student_id).strip())
+            if n > highest:
+                highest = n
+        except (TypeError, ValueError):
+            continue
+    if highest == 0:
+        highest = Student.query.count()
+    return highest + 1
+
+
+def user_can_add_student(user):
+    """Admins/Moderators: unlimited. Regular Users: only 1 student total."""
+    if user.can_manage_all_records:
+        return True
+    return Student.query.filter_by(owner_id=user.id).count() < 1
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
     user = current_user()
-    if user.can_manage_all_records:
-        # Admin & Moderator see all records
-        students = Student.query.order_by(Student.name.asc()).all()
-    else:
-        # Regular user sees only their own
-        students = (Student.query.filter_by(owner_id=user.id)
-                    .order_by(Student.name.asc()).all())
-    return render_template("dashboard.html", students=students)
+    # Everyone can see the full students list
+    students = Student.query.order_by(Student.name.asc()).all()
+    return render_template(
+        "dashboard.html",
+        students=students,
+        next_id=next_student_id(),
+        can_add=user_can_add_student(user),
+    )
 
 
 @app.route("/students/add", methods=["POST"])
 @login_required
 def add_student():
     user = current_user()
+    # Enforce the per-User add limit (regular Users may add only 1 student)
+    if not user_can_add_student(user):
+        flash("You have already added your student. Each user can add only one.", "error")
+        return redirect(url_for("dashboard"))
     name = request.form.get("name", "").strip()
     if not name:
         flash("Student name is required.", "error")
         return redirect(url_for("dashboard"))
     student = Student(
-        student_id=request.form.get("student_id", "").strip(),
+        # ID is assigned automatically by the server (next available number)
+        student_id=str(next_student_id()),
         name=name,
         age=_to_int(request.form.get("age")),
         email=request.form.get("email", "").strip(),
@@ -235,7 +263,7 @@ def edit_student(student_pk):
     student = db.session.get(Student, student_pk)
     if not student or not can_edit_record(user, student):
         abort(403)
-    student.student_id = request.form.get("student_id", "").strip()
+    # student_id is system-assigned and not editable; leave it unchanged
     student.name = request.form.get("name", "").strip()
     student.age = _to_int(request.form.get("age"))
     student.email = request.form.get("email", "").strip()

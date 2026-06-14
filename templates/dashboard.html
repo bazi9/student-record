@@ -4,13 +4,13 @@
 <div class="page-head">
     <div>
         <h2>Student Records</h2>
-        {% if user.can_manage_all_records %}
         <span class="subtitle">Viewing all records ({{ user.role }}) &middot; right-click a name to view profile</span>
-        {% else %}
-        <span class="subtitle">Viewing your own records &middot; right-click a name to view profile</span>
-        {% endif %}
     </div>
+    {% if can_add %}
     <button class="btn-primary" onclick="openAddForm()">+ Add Student</button>
+    {% else %}
+    <span class="subtitle">You've already added your student (limit: 1).</span>
+    {% endif %}
 </div>
 
 {% if students %}
@@ -22,7 +22,7 @@
             <th>Age</th>
             <th>Email</th>
             <th>Address</th>
-            {% if user.can_manage_all_records %}<th>Added by</th>{% endif %}
+            <th>Added by</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -37,14 +37,18 @@
             <td>{{ s.age if s.age is not none else '-' }}</td>
             <td>{{ s.email }}</td>
             <td>{{ s.address }}</td>
-            {% if user.can_manage_all_records %}<td>{{ s.owner.username }}</td>{% endif %}
+            <td>{{ s.owner.username }}</td>
             <td class="actions">
+                {% if user.can_manage_all_records or s.owner_id == user.id %}
                 <button class="btn-warning btn-sm"
                     onclick="openEditForm('{{ s.id }}', '{{ s.student_id }}', '{{ s.name|e }}', '{{ s.age if s.age is not none else '' }}', '{{ s.email|e }}', '{{ s.address|e }}')">Edit</button>
                 <form method="POST" action="{{ url_for('delete_student', student_pk=s.id) }}" style="display:inline"
                       onsubmit="return confirm('Delete this student?');">
                     <button type="submit" class="btn-danger btn-sm">Delete</button>
                 </form>
+                {% else %}
+                <span class="muted">&mdash;</span>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
@@ -72,7 +76,7 @@
     <div class="modal-card">
         <h3>Add Student</h3>
         <form method="POST" action="{{ url_for('add_student') }}">
-            <div class="form-group"><input type="text" name="student_id" placeholder="ID Number"></div>
+            <div class="form-group"><input type="text" name="student_id" value="{{ next_id }}" readonly title="ID is assigned automatically"></div>
             <div class="form-group"><input type="text" name="name" placeholder="Full Name" required></div>
             <div class="form-group"><input type="number" name="age" placeholder="Age"></div>
             <div class="form-group"><input type="email" name="email" placeholder="Email Address"></div>
@@ -90,7 +94,7 @@
     <div class="modal-card">
         <h3>Edit Student</h3>
         <form method="POST" id="editForm">
-            <div class="form-group"><input type="text" name="student_id" id="editStudentId" placeholder="ID Number"></div>
+            <div class="form-group"><input type="text" name="student_id" id="editStudentId" readonly title="ID is assigned automatically"></div>
             <div class="form-group"><input type="text" name="name" id="editName" placeholder="Full Name" required></div>
             <div class="form-group"><input type="number" name="age" id="editAge" placeholder="Age"></div>
             <div class="form-group"><input type="email" name="email" id="editEmail" placeholder="Email Address"></div>

@@ -211,3 +211,10 @@ td.actions form { margin-left: 4px; }
 .role-legend ul { list-style: none; padding: 0; margin: 10px 0 0; }
 .role-legend li { margin-bottom: 8px; }
 .role-legend .role-badge { margin-right: 8px; }
+
+/* Read-only fields (e.g. auto-assigned Student ID) */
+.form-group input[readonly] {
+    background: #f1f3f5;
+    color: #6b7280;
+    cursor: not-allowed;
+}
