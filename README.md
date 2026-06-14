@@ -5,9 +5,18 @@ COM6301 Undergraduate Project.
 
 ## Features
 - User registration and login (passwords hashed with Werkzeug, session-based auth)
-- Student records CRUD (add, view, edit, delete) — each user sees only their own records
-- Rankings / leaderboard page ordering students by score
+- Role-based access control (RBAC) with three roles:
+  - **Administrator** — manage user accounts and roles, plus full access to all records
+  - **Moderator** — add/edit/delete any student record (cannot manage roles)
+  - **User** — add records and edit/delete only the records they created
+- Student records CRUD (add, view, edit, delete)
+- Admin User Management page (assign roles, delete accounts)
 - SQLite for local development, PostgreSQL in production (Render)
+
+## Roles
+The account that registers with the `ADMIN_EMAIL` address automatically becomes
+Administrator. All other sign-ups are Users by default; an Administrator can
+promote them to Moderator or Administrator from the Manage Users page.
 
 ## Tech stack
 - Python (Flask, Flask-SQLAlchemy)

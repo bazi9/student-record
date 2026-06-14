@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Manage Users - Student Records{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h2>Manage Users</h2>
+        <span class="subtitle">Assign roles or remove accounts (Administrator only)</span>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Current Role</th>
+            <th>Change Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.username }}{% if u.id == user.id %} <span class="you-tag">(you)</span>{% endif %}</td>
+            <td>{{ u.email }}</td>
+            <td><span class="role-badge role-{{ u.role|lower }}">{{ u.role }}</span></td>
+            <td>
+                {% if u.id == user.id %}
+                    <span class="muted">—</span>
+                {% else %}
+                <form method="POST" action="{{ url_for('change_role', user_pk=u.id) }}" class="inline-form">
+                    <select name="role">
+                        {% for r in roles %}
+                        <option value="{{ r }}" {% if r == u.role %}selected{% endif %}>{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-primary btn-sm">Save</button>
+                </form>
+                {% endif %}
+            </td>
+            <td class="actions">
+                {% if u.id == user.id %}
+                    <span class="muted">—</span>
+                {% else %}
+                <form method="POST" action="{{ url_for('delete_user', user_pk=u.id) }}" style="display:inline"
+                      onsubmit="return confirm('Delete this user and all their records?');">
+                    <button type="submit" class="btn-danger btn-sm">Delete</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="role-legend">
+    <p><strong>Role permissions:</strong></p>
+    <ul>
+        <li><span class="role-badge role-administrator">Administrator</span> Manage user accounts and roles, plus full access to all records.</li>
+        <li><span class="role-badge role-moderator">Moderator</span> Add, edit and delete any student record. Cannot change roles.</li>
+        <li><span class="role-badge role-user">User</span> Add records and edit/delete only the records they created.</li>
+    </ul>
+</div>
+{% endblock %}

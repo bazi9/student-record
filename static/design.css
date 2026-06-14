@@ -139,17 +139,37 @@ td.actions form { margin-left: 4px; }
 /* Empty state */
 .empty { color: #718096; background: #fff; padding: 30px; border-radius: 8px; text-align: center; }
 
-/* Rankings medals */
-.rank-cell { font-weight: 700; }
-.medal {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    color: #fff;
+/* Role badges */
+.role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
     font-weight: 700;
+    color: #fff;
 }
-.medal.gold { background: #f1c40f; }
-.medal.silver { background: #95a5a6; }
-.medal.bronze { background: #cd7f32; }
+.role-administrator { background: #8e44ad; }
+.role-moderator { background: #2980b9; }
+.role-user { background: #7f8c8d; }
+
+/* User management page */
+.inline-form { display: flex; gap: 8px; align-items: center; }
+.inline-form select {
+    padding: 7px 8px;
+    border: 1px solid #dfe4ea;
+    border-radius: 6px;
+    font-size: 13px;
+}
+.you-tag { color: #718096; font-size: 12px; }
+.muted { color: #b0b8c1; }
+.role-legend {
+    margin-top: 24px;
+    background: #fff;
+    padding: 18px 22px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    font-size: 14px;
+}
+.role-legend ul { list-style: none; padding: 0; margin: 10px 0 0; }
+.role-legend li { margin-bottom: 8px; }
+.role-legend .role-badge { margin-right: 8px; }

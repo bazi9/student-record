@@ -2,7 +2,14 @@
 {% block title %}Records - Student Records{% endblock %}
 {% block content %}
 <div class="page-head">
-    <h2>Student Records</h2>
+    <div>
+        <h2>Student Records</h2>
+        {% if user.can_manage_all_records %}
+        <span class="subtitle">Viewing all records ({{ user.role }})</span>
+        {% else %}
+        <span class="subtitle">Viewing your own records</span>
+        {% endif %}
+    </div>
     <button class="btn-primary" onclick="openAddForm()">+ Add Student</button>
 </div>
 
@@ -16,6 +23,7 @@
             <th>Email</th>
             <th>Address</th>
             <th>Score</th>
+            {% if user.can_manage_all_records %}<th>Added by</th>{% endif %}
             <th>Actions</th>
         </tr>
     </thead>
@@ -28,6 +36,7 @@
             <td>{{ s.email }}</td>
             <td>{{ s.address }}</td>
             <td>{{ s.score }}</td>
+            {% if user.can_manage_all_records %}<td>{{ s.owner.username }}</td>{% endif %}
             <td class="actions">
                 <button class="btn-warning btn-sm"
                     onclick="openEditForm('{{ s.id }}', '{{ s.student_id }}', '{{ s.name|e }}', '{{ s.age if s.age is not none else '' }}', '{{ s.email|e }}', '{{ s.address|e }}', '{{ s.score }}')">Edit</button>
@@ -54,7 +63,7 @@
             <div class="form-group"><input type="number" name="age" placeholder="Age"></div>
             <div class="form-group"><input type="email" name="email" placeholder="Email Address"></div>
             <div class="form-group"><input type="text" name="address" placeholder="Home Address"></div>
-            <div class="form-group"><input type="number" step="any" name="score" placeholder="Score (for rankings)"></div>
+            <div class="form-group"><input type="number" step="any" name="score" placeholder="Score"></div>
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeAddForm()">Cancel</button>
                 <button type="submit" class="btn-primary">Save</button>
@@ -73,7 +82,7 @@
             <div class="form-group"><input type="number" name="age" id="editAge" placeholder="Age"></div>
             <div class="form-group"><input type="email" name="email" id="editEmail" placeholder="Email Address"></div>
             <div class="form-group"><input type="text" name="address" id="editAddress" placeholder="Home Address"></div>
-            <div class="form-group"><input type="number" step="any" name="score" id="editScore" placeholder="Score (for rankings)"></div>
+            <div class="form-group"><input type="number" step="any" name="score" id="editScore" placeholder="Score"></div>
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeEditForm()">Cancel</button>
                 <button type="submit" class="btn-primary">Update</button>
