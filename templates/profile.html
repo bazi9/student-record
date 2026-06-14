@@ -1,38 +1,54 @@
 {% extends "base.html" %}
 {% block title %}My Profile - Student Records{% endblock %}
 {% block content %}
-<div class="page-head">
-    <div>
-        <h2>My Profile</h2>
-        <span class="subtitle">Your account details and what you can do</span>
-    </div>
-</div>
-
-<div class="profile-page">
-    <div class="profile-page-head">
-        <div class="profile-avatar-lg">{{ account.username[0]|upper }}</div>
-        <div>
+<div class="profile-wrap">
+    <div class="profile-page">
+        <div class="profile-page-head">
+            <div class="profile-avatar-lg">
+                {% if account.avatar_url %}
+                <img src="{{ account.avatar_url }}" alt="Profile picture"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <span class="avatar-fallback" style="display:none">{{ account.username[0]|upper }}</span>
+                {% else %}
+                <span class="avatar-fallback">{{ account.username[0]|upper }}</span>
+                {% endif %}
+            </div>
             <h3 class="profile-page-name">{{ account.username }}</h3>
             <span class="role-badge role-{{ account.role|lower }}">{{ account.role }}</span>
         </div>
-    </div>
 
-    <div class="profile-detail-list">
-        <div class="profile-row"><span class="profile-label">Username</span><span>{{ account.username }}</span></div>
-        <div class="profile-row"><span class="profile-label">Ranking</span><span>{{ account.role }}</span></div>
-        <div class="profile-row"><span class="profile-label">Email</span><span>{{ account.email }}</span></div>
-        <div class="profile-row"><span class="profile-label">Status</span><span>{{ account.status|capitalize }}</span></div>
-    </div>
+        <div class="profile-detail-list">
+            <div class="profile-row"><span class="profile-label">Username</span><span>{{ account.username }}</span></div>
+            <div class="profile-row"><span class="profile-label">Ranking</span><span>{{ account.role }}</span></div>
+            <div class="profile-row"><span class="profile-label">Email</span><span>{{ account.email }}</span></div>
+            <div class="profile-row"><span class="profile-label">Status</span><span class="status-pill">{{ account.status|capitalize }}</span></div>
+        </div>
 
-    <div class="profile-permissions">
-        <h4>What you can do</h4>
-        <ul>
-            {% for p in account.permissions %}
-            <li>{{ p }}</li>
-            {% endfor %}
-        </ul>
-    </div>
+        <div class="profile-permissions">
+            <h4>What you can do</h4>
+            <div class="perm-grid">
+                {% for p in account.permissions %}
+                <div class="perm-item">
+                    <span class="perm-check">&#10003;</span>
+                    <span>{{ p }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
 
-    <a href="{{ url_for('dashboard') }}" class="btn-secondary">Back to Records</a>
+        <div class="profile-avatar-form">
+            <h4>Profile picture</h4>
+            <form method="POST" action="{{ url_for('update_avatar') }}">
+                <div class="avatar-input-row">
+                    <input type="url" name="avatar_url" value="{{ account.avatar_url or '' }}"
+                           placeholder="Paste an image link (https://...)">
+                    <button type="submit" class="btn-primary">Save</button>
+                </div>
+                <span class="hint">Paste a link to an image hosted online. Leave empty and save to remove it.</span>
+            </form>
+        </div>
+
+        <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-block">Back to Records</a>
+    </div>
 </div>
 {% endblock %}

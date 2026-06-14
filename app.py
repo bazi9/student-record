@@ -77,6 +77,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default=ROLE_USER)
     status = db.Column(db.String(20), nullable=False, default=STATUS_PENDING)
+    avatar_url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     students = db.relationship("Student", backref="owner", lazy=True)
@@ -408,6 +409,21 @@ def profile():
     return render_template("profile.html", account=current_user())
 
 
+@app.route("/profile/avatar", methods=["POST"])
+@login_required
+def update_avatar():
+    user = current_user()
+    url = request.form.get("avatar_url", "").strip()
+    # Basic validation: must be empty (to clear) or a http/https image link
+    if url and not (url.startswith("http://") or url.startswith("https://")):
+        flash("Please enter a valid image link starting with http:// or https://", "error")
+        return redirect(url_for("profile"))
+    user.avatar_url = url or None
+    db.session.commit()
+    flash("Profile picture updated." if url else "Profile picture removed.", "success")
+    return redirect(url_for("profile"))
+
+
 # --- Routes: account approvals (Admin & Moderator) ---------------------------
 @app.route("/approvals")
 @manager_required
@@ -492,6 +508,15 @@ def ensure_schema():
             conn.execute(text(
                 "ALTER TABLE \"user\" ADD COLUMN status VARCHAR(20) "
                 "NOT NULL DEFAULT 'approved'"
+            ))
+        db.session.commit()
+
+    # Add the `avatar_url` column if upgrading an existing DB.
+    cols = [c["name"] for c in inspector.get_columns("user")]
+    if "avatar_url" not in cols:
+        with db.engine.begin() as conn:
+            conn.execute(text(
+                "ALTER TABLE \"user\" ADD COLUMN avatar_url VARCHAR(500)"
             ))
         db.session.commit()
 
