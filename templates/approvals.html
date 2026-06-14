@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Pending Approvals - Student Records{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h2>Pending Approvals</h2>
+        <span class="subtitle">Approve or decline new registrations (Administrator &amp; Moderator)</span>
+    </div>
+</div>
+
+{% if pending %}
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Registered</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in pending %}
+        <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.created_at.strftime('%d %b %Y, %H:%M') if u.created_at else '-' }}</td>
+            <td class="actions">
+                <form method="POST" action="{{ url_for('approve_user', user_pk=u.id) }}" style="display:inline">
+                    <button type="submit" class="btn-primary btn-sm">Approve</button>
+                </form>
+                <form method="POST" action="{{ url_for('decline_user', user_pk=u.id) }}" style="display:inline"
+                      onsubmit="return confirm('Decline and remove this registration?');">
+                    <button type="submit" class="btn-danger btn-sm">Decline</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty">No pending registrations. All caught up.</p>
+{% endif %}
+{% endblock %}

@@ -12,8 +12,9 @@
         {% if user %}
         <div class="nav-links">
             <a href="{{ url_for('dashboard') }}">Records</a>
+            {% if user.can_manage_users %}<a href="{{ url_for('approvals') }}">Approvals{% if pending_count %} <span class="nav-badge">{{ pending_count }}</span>{% endif %}</a>{% endif %}
             {% if user.is_admin %}<a href="{{ url_for('manage_users') }}">Manage Users</a>{% endif %}
-            <span class="nav-user">{{ user.username }}</span>
+            <a href="{{ url_for('profile') }}" class="nav-user" title="View my profile">{{ user.username }}</a>
             <span class="role-badge role-{{ user.role|lower }}">{{ user.role }}</span>
             <a href="{{ url_for('logout') }}" class="nav-logout">Logout</a>
         </div>

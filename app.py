@@ -44,6 +44,30 @@ ROLE_MODERATOR = "Moderator"
 ROLE_USER = "User"
 ALL_ROLES = [ROLE_ADMIN, ROLE_MODERATOR, ROLE_USER]
 
+# Account approval status
+STATUS_PENDING = "pending"
+STATUS_APPROVED = "approved"
+
+# Human-readable summary of what each role can do (shown on the profile page)
+ROLE_PERMISSIONS = {
+    ROLE_ADMIN: [
+        "View the full list of student records",
+        "Add, edit and delete ANY student record",
+        "Approve or decline new account registrations",
+        "Manage user accounts: change roles and delete users",
+    ],
+    ROLE_MODERATOR: [
+        "View the full list of student records",
+        "Add, edit and delete ANY student record",
+        "Approve or decline new account registrations",
+    ],
+    ROLE_USER: [
+        "View the full list of student records",
+        "Add one student record",
+        "Edit and delete only the record they added",
+    ],
+}
+
 
 # --- Database models ---------------------------------------------------------
 class User(db.Model):
@@ -52,6 +76,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default=ROLE_USER)
+    status = db.Column(db.String(20), nullable=False, default=STATUS_PENDING)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     students = db.relationship("Student", backref="owner", lazy=True)
@@ -70,6 +95,19 @@ class User(db.Model):
     def can_manage_all_records(self):
         # Admins and Moderators can manage every record
         return self.role in (ROLE_ADMIN, ROLE_MODERATOR)
+
+    @property
+    def can_manage_users(self):
+        # Admins and Moderators can approve/decline registrations
+        return self.role in (ROLE_ADMIN, ROLE_MODERATOR)
+
+    @property
+    def is_approved(self):
+        return self.status == STATUS_APPROVED
+
+    @property
+    def permissions(self):
+        return ROLE_PERMISSIONS.get(self.role, [])
 
 
 class Student(db.Model):
@@ -117,6 +155,21 @@ def admin_required(view):
     return wrapped
 
 
+def manager_required(view):
+    """Administrators and Moderators may access (used for approvals)."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        user = current_user()
+        if user is None:
+            flash("Please log in to continue.", "error")
+            return redirect(url_for("login"))
+        if not user.can_manage_users:
+            flash("You do not have permission to do that.", "error")
+            return redirect(url_for("dashboard"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
 def can_edit_record(user, student):
     """User can edit own records; Admin/Moderator can edit any."""
     if user is None or student is None:
@@ -126,8 +179,13 @@ def can_edit_record(user, student):
 
 @app.context_processor
 def inject_globals():
-    return {"user": current_user(), "ROLE_ADMIN": ROLE_ADMIN,
-            "ROLE_MODERATOR": ROLE_MODERATOR, "ROLE_USER": ROLE_USER}
+    user = current_user()
+    pending_count = 0
+    if user is not None and user.can_manage_users:
+        pending_count = User.query.filter_by(status=STATUS_PENDING).count()
+    return {"user": user, "ROLE_ADMIN": ROLE_ADMIN,
+            "ROLE_MODERATOR": ROLE_MODERATOR, "ROLE_USER": ROLE_USER,
+            "pending_count": pending_count}
 
 
 # --- Routes: authentication --------------------------------------------------
@@ -150,13 +208,21 @@ def register():
         elif User.query.filter_by(email=email).first():
             flash("An account with that email already exists.", "error")
         else:
-            # Hardcoded admin email becomes Administrator; everyone else is User
-            role = ROLE_ADMIN if email == ADMIN_EMAIL else ROLE_USER
-            user = User(username=username, email=email, role=role)
+            # Hardcoded admin email becomes Administrator (auto-approved);
+            # everyone else is a User who must be approved before logging in.
+            if email == ADMIN_EMAIL:
+                role, status = ROLE_ADMIN, STATUS_APPROVED
+            else:
+                role, status = ROLE_USER, STATUS_PENDING
+            user = User(username=username, email=email, role=role, status=status)
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
-            flash("Account created. You can now log in.", "success")
+            if status == STATUS_APPROVED:
+                flash("Account created. You can now log in.", "success")
+            else:
+                flash("Account created. An administrator or moderator must "
+                      "approve it before you can log in.", "success")
             return redirect(url_for("login"))
 
     return render_template("register.html")
@@ -169,6 +235,10 @@ def login():
         password = request.form.get("password", "")
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
+            if not user.is_approved:
+                flash("Your account is awaiting approval by an administrator "
+                      "or moderator. Please try again later.", "error")
+                return render_template("login.html")
             session.clear()
             session["user_id"] = user.id
             flash(f"Welcome back, {user.username}.", "success")
@@ -331,6 +401,54 @@ def delete_user(user_pk):
     return redirect(url_for("manage_users"))
 
 
+# --- Routes: my profile ------------------------------------------------------
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template("profile.html", account=current_user())
+
+
+# --- Routes: account approvals (Admin & Moderator) ---------------------------
+@app.route("/approvals")
+@manager_required
+def approvals():
+    pending = (User.query.filter_by(status=STATUS_PENDING)
+               .order_by(User.created_at.asc()).all())
+    return render_template("approvals.html", pending=pending)
+
+
+@app.route("/approvals/<int:user_pk>/approve", methods=["POST"])
+@manager_required
+def approve_user(user_pk):
+    target = db.session.get(User, user_pk)
+    if not target:
+        abort(404)
+    target.status = STATUS_APPROVED
+    db.session.commit()
+    flash(f"{target.username}'s account was approved. They can now log in.",
+          "success")
+    return redirect(url_for("approvals"))
+
+
+@app.route("/approvals/<int:user_pk>/decline", methods=["POST"])
+@manager_required
+def decline_user(user_pk):
+    target = db.session.get(User, user_pk)
+    if not target:
+        abort(404)
+    if target.is_approved:
+        flash("That account is already approved.", "error")
+        return redirect(url_for("approvals"))
+    name = target.username
+    # Declined accounts are removed entirely
+    Student.query.filter_by(owner_id=target.id).delete()
+    db.session.delete(target)
+    db.session.commit()
+    flash(f"{name}'s registration was declined and the account removed.",
+          "success")
+    return redirect(url_for("approvals"))
+
+
 # --- Small helpers -----------------------------------------------------------
 def _to_int(value):
     try:
@@ -365,6 +483,17 @@ def ensure_schema():
         if existing_admin:
             existing_admin.role = ROLE_ADMIN
             db.session.commit()
+
+    # Add the `status` column if upgrading an existing DB. Existing accounts
+    # are marked approved so nobody already registered gets locked out.
+    cols = [c["name"] for c in inspector.get_columns("user")]
+    if "status" not in cols:
+        with db.engine.begin() as conn:
+            conn.execute(text(
+                "ALTER TABLE \"user\" ADD COLUMN status VARCHAR(20) "
+                "NOT NULL DEFAULT 'approved'"
+            ))
+        db.session.commit()
 
 
 with app.app_context():

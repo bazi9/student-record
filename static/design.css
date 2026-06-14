@@ -218,3 +218,53 @@ td.actions form { margin-left: 4px; }
     color: #6b7280;
     cursor: not-allowed;
 }
+
+/* Nav notification badge (pending approvals count) */
+.nav-badge {
+    display: inline-block;
+    min-width: 18px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: #e53e3e;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 16px;
+}
+.nav-user { cursor: pointer; }
+.nav-user:hover { text-decoration: underline; }
+
+/* My Profile page */
+.profile-page {
+    max-width: 560px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.profile-page-head {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+.profile-avatar-lg {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #2d3a4f;
+    color: #fff;
+    font-size: 28px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+.profile-page-name { margin: 0 0 6px 0; }
+.profile-detail-list { margin-bottom: 22px; }
+.profile-permissions h4 { margin: 0 0 10px 0; }
+.profile-permissions ul { margin: 0 0 22px 0; padding-left: 20px; }
+.profile-permissions li { margin-bottom: 6px; color: #4a5568; }
